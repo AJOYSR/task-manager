@@ -1,0 +1,35 @@
+.logo {
+  width: 120px;
+  height: 120px;
+}
+
+.image-tile {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 100px;
+}
+
+h1 {
+  color: rgb(1, 172, 172);
+}
+
+.input-name {
+  padding: 20px;
+  border: 2px solid aqua;
+  width: 260px;
+}
+
+.submit-button {
+  background-color: rgb(1, 172, 172);
+  font-weight: bold;
+  color: white;
+  padding: 20px;
+  border: none;
+}
+.input-form {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 200px;
+}
