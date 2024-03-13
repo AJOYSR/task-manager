@@ -16,7 +16,7 @@ export const LoginContextProvider = (props: any) => {
   });
 
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (localStorage.getItem("token")) {
       setIsLoggedIn(true);
@@ -40,7 +40,7 @@ export const LoginContextProvider = (props: any) => {
     localStorage.removeItem("userName");
     setIsLoggedIn(false);
     setUserName(null);
-    navigate("/");
+    navigate("/login");
     return null;
   };
 

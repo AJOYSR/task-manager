@@ -17,7 +17,7 @@
 .input-name {
   padding: 20px;
   border: 2px solid aqua;
-  width: 260px;
+  width: 360px;
 }
 
 .submit-button {
@@ -31,6 +31,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
+
   gap: 200px;
 }
 
@@ -103,4 +104,119 @@
   display: flex;
   align-items: space-between;
   gap: 100px;
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.info-button {
+  background-color: rgb(210, 206, 206);
+  color: black;
+  padding: 8px;
+  border: none;
+}
+
+.info-button:hover {
+  background-color: rgb(140, 140, 140);
+  cursor: pointer;
+}
+
+.link-style {
+  text-decoration: none !important;
+  color: black !important;
+  font-weight: bold;
+}
+.select-option {
+  color: black !important;
+}
+
+.edit-delete {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 5px;
+}
+
+.edit-delete button {
+  padding: 5px;
+  color: black;
+  background: #6b6a6a;
+}
+
+/* Add this to your CSS styles or create a new CSS file */
+
+/* Modal container */
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* semi-transparent overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure modal is on top of other elements */
+}
+
+/* Modal content */
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle box shadow */
+  max-width: 400px; /* Set a maximum width for the modal */
+  width: 100%; /* Ensure the modal takes the full width on smaller screens */
+}
+
+/* Modal buttons */
+.cancel-button {
+  margin: 8px;
+  padding: 8px 16px;
+  background-color: #007bff; /* Change color according to your design */
+  color: #fff; /* Text color */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Optional: Add a smooth transition effect */
+}
+
+.delete-button {
+  margin: 8px;
+  padding: 8px 16px;
+  background-color: #ff0015; /* Change color according to your design */
+  color: #fff; /* Text color */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Optional: Add a smooth transition effect */
+}
+
+.member-detail {
+  display: flex;
+  gap: 500px;
+}
+
+.homepage {
+  display: flex;
+  gap: 100px;
+  align-items: center;
+}
+
+.homepage div {
+  padding: 20px;
+  background: rgb(7, 206, 206);
+  color: white;
+
+  font-weight: bold;
+}
+
+.link-style-home {
+  text-decoration: none !important;
+  color: white !important;
+  font-weight: bold;
 }

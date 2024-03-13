@@ -28,16 +28,34 @@ const Tasks = () => {
 
   return (
     <div>
-      <h1>Tasks</h1>
+      <div className="info">
+        <h1>List of Tasks</h1>{" "}
+        <button className="info-button">
+          <Link to={"/add-or-edit"} className="link-style ">
+            {" "}
+            Add new
+          </Link>
+        </button>
+      </div>
       <ul>
         {tasks.map((task) => (
           <li key={task.id} className="task-list">
             <p>
               <Link to={`/task-details/${task.id}`}>
-                {task.id}. {task.title}
+                {task.id && task.title
+                  ? ` ${task.title}`
+                  : "Task Title Not Available"}
               </Link>
             </p>
-            <p>{task.Member.name}</p>
+            <p>
+              {task.Member?.name ? (
+                <Link to={`/member-details/${task.Member.id}`}>
+                  {task.Member.name}
+                </Link>
+              ) : (
+                <span>Member N/A</span>
+              )}
+            </p>
           </li>
         ))}
       </ul>

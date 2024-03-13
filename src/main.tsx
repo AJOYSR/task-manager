@@ -12,6 +12,8 @@ import Members from "./components/Members.tsx";
 import Tasks from './components/Tasks';
 import TaskDetails from "./components/TaskDetails.tsx";
 import MemberDetails from "./components/MemberDetails.tsx";
+import AddorEditTask from "./components/AddorEditTask.tsx";
+import AddOrEditMember from "./components/AddOrEditMember.tsx";
 
 
 
@@ -29,6 +31,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/members" element={<Members />} />
           <Route path="/task-details/:id" element={<TaskDetails />} />
           <Route path="/member-details/:id" element={<MemberDetails />} />
+          <Route path="/add-or-edit" element={<AddorEditTask />} />
+          <Route path="/add-or-edit/:id" element={<AddorEditTask />} />
+          <Route path="/add-or-edit-member" element={<AddOrEditMember />} />
+          <Route path="/add-or-edit-member/:id" element={<AddOrEditMember />} />
         </Routes>
       </LoginContextProvider>
     </BrowserRouter>

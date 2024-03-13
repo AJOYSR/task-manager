@@ -1,33 +1,44 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Modal from "./Modal";
+import { Spinner } from "./Spinner";
 
 const MemberDetails = () => {
   const { id } = useParams();
   const [member, setMember] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [userTasks, setUserTasks] = useState([]);
-
+  const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
   const apiUrl = `http://127.0.0.1:9001/private/members/${id}`;
   const url = "http://127.0.0.1:9001/private/tasks/";
 
   useEffect(() => {
-    const authToken = localStorage.getItem("token");
-
-    axios
-      .get(url, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      })
-      .then((response) => {
-        console.log(response.data);
+    const fetchTasks = async () => {
+      try {
+        const authToken = localStorage.getItem("token");
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+  
+        console.log(response.data.tasks);
         setTasks(response.data.tasks);
-      })
-      .catch((error) => {
+  
+        // Filter tasks based on the memberId
+        const memberTasks = response.data.tasks.filter((task) => task.Member?.id === parseInt(id));
+        console.log(memberTasks);
+        setUserTasks(memberTasks);
+      } catch (error) {
         console.error("Error fetching tasks:", error);
-      });
-  }, [url]);
+      }
+    };
+  
+    fetchTasks();
+  }, [url, id]);
+  
 
   useEffect(() => {
     const fetchMember = async () => {
@@ -40,16 +51,10 @@ const MemberDetails = () => {
             Authorization: `Bearer ${authToken}`,
           },
         });
+
         console.log(response.data.member);
         setMember(response.data.member);
 
-        const memberTasks = tasks.filter(
-          (task) => task.Member.id === member.id
-        );
-
-        console.log(memberTasks);
-
-        setUserTasks(memberTasks);
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
@@ -58,23 +63,65 @@ const MemberDetails = () => {
     fetchMember();
   }, [apiUrl, tasks, id]);
 
+  const handleDelete = () => {
+    setShowModal(true);
+  };
+
+  const confirmDelete = async () => {
+    const url = "http://127.0.0.1:9001/private/members/";
+    try {
+      const authToken = localStorage.getItem("token");
+
+      await axios.delete(url + `${id}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      setShowModal(false);
+      navigate("/members");
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+  const handleEdit = () => {
+    navigate(`/add-or-edit-member/${id}`);
+  };
+
   return (
-    <div>
-      {member ? (
-        <>
-          <h3>{member.name}</h3>
-          <h4>Tasks:</h4>
-          <ul>
-            {userTasks.map((task) => (
-              <li key={task.id}>
-                <Link to={`/task-details/${task.id}`}>{task.title}</Link>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : (
-        <p>Loading member details...</p>
-      )}
+    <div className="member-detail">
+      <div>
+        {member ? (
+          <>
+            <h3>{member.name}</h3>
+            <h4>Tasks:</h4>
+            <ul>
+              {userTasks.map((task) => (
+                <li key={task.id}>
+                  <Link to={`/task-details/${task.id}`}>{task.title}</Link>
+                </li>
+              ))}
+            </ul>
+            {showModal && (
+              <Modal
+                title="Confirm Deletion of this member"
+                buttonTitle="Delete"
+                deleteRecord={confirmDelete}
+                closeModal={closeModal}
+              />
+            )}
+          </>
+        ) : (
+          <Spinner message={"Loading task details..."} />
+        )}
+      </div>
+      <div className="edit-delete">
+        <button onClick={handleEdit}>Edit</button>
+        <button onClick={handleDelete}>Delete</button>
+      </div>
     </div>
   );
 };

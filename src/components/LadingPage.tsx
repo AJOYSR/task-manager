@@ -1,11 +1,13 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { productImages } from "../utils/image";
 import { Link, useNavigate } from "react-router-dom";
+import { UserContext } from "../context/userContext/LoginContext";
 const LadingPage = () => {
   const navigate = useNavigate();
+  const { isLoggedIn } = useContext(UserContext);
   useEffect(() => {
-    navigate("/home");
-  }, []);
+    if (isLoggedIn) navigate("/home");
+  }, [isLoggedIn]);
   return (
     <div>
       <div className="image-tile">
