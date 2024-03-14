@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Spinner } from "./Spinner";
+import { Formik, Form, Field } from "formik";
 
 const AddOrEditMember = () => {
   const { id } = useParams();
@@ -32,8 +33,7 @@ const AddOrEditMember = () => {
     }
   }, [id]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (values: any) => {
     const authToken = localStorage.getItem("token");
     const backendEndpoint = id
       ? `http://127.0.0.1:9001/private/members/${id}`
@@ -45,12 +45,12 @@ const AddOrEditMember = () => {
     try {
       setIsLoading(true); // Start loading
       const response = id
-        ? await axios.patch(backendEndpoint, { name }, { headers })
-        : await axios.post(backendEndpoint, { name }, { headers });
+        ? await axios.patch(backendEndpoint, { name: values.name }, { headers })
+        : await axios.post(backendEndpoint, { name: values.name }, { headers });
 
       console.log("Response from server:", response.data);
 
-      navigate('/members');
+      navigate("/members");
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -61,24 +61,33 @@ const AddOrEditMember = () => {
   return (
     <div style={{ marginTop: "20px" }}>
       {isLoading ? (
-        <Spinner message={"Loading ....."}/>
+        <Spinner message={"Loading ....."} />
       ) : (
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            className="input-name"
-            placeholder="Enter Name of Member"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="submit-button"
-            style={{ marginLeft: "10px" }}
-          >
-            Submit
-          </button>
-        </form>
+        <Formik
+          initialValues={{
+            name: name || "",
+          }}
+          onSubmit={(values) => {
+            handleSubmit(values);
+          }}
+        >
+          {() => (
+            <Form>
+              <Field
+                name="name"
+                placeholder="Enter Name of Member"
+                className="input-name"
+              />
+              <button
+                type="submit"
+                className="submit-button"
+                style={{ marginLeft: "10px" }}
+              >
+                Submit
+              </button>
+            </Form>
+          )}
+        </Formik>
       )}
     </div>
   );

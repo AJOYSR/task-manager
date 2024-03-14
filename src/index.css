@@ -223,3 +223,9 @@
   color: white !important;
   font-weight: bold;
 }
+
+.option-class {
+  padding: 20px;
+  background: #c2acac;
+  color: black;
+}

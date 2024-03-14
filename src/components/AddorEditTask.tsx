@@ -1,8 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Select from "react-select";
+
 import { Spinner } from "./Spinner";
+import { Formik, Form, Field } from "formik";
 
 const AddorEditTask = () => {
   const [title, setTitle] = useState("");
@@ -62,8 +63,7 @@ const AddorEditTask = () => {
     }
   }, [id]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (values: any) => {
     const authToken = localStorage.getItem("token");
     const headers = {
       Authorization: `Bearer ${authToken}`,
@@ -75,9 +75,9 @@ const AddorEditTask = () => {
         await axios.patch(
           taskUrl,
           {
-            title,
-            description,
-            memberId,
+            title: values.title,
+            description: values.description,
+            memberId: values.memberId,
           },
           { headers }
         );
@@ -86,9 +86,9 @@ const AddorEditTask = () => {
         await axios.post(
           "http://127.0.0.1:9001/private/tasks",
           {
-            title,
-            description,
-            memberId,
+            title: values.title,
+            description: values.description,
+            memberId: values.memberId,
           },
           { headers }
         );
@@ -105,45 +105,50 @@ const AddorEditTask = () => {
   return (
     <div>
       <br />
-      {isLoading ? ( 
-        <Spinner message={"Loading edit/add page"}/>
+      {isLoading ? (
+        <Spinner message={"Loading edit/add page"} />
       ) : (
-        <form onSubmit={handleSubmit}>
-          <div>
-            <div>
-              <input
-                type="text"
-                className="input-name"
+        <Formik
+          initialValues={{
+            title: title || "",
+            description: description || "",
+            memberId: -1,
+          }}
+          onSubmit={(values) => {
+            handleSubmit(values);
+            console.log(values);
+          }}
+        >
+          {() => (
+            <Form>
+              <Field
+                name="title"
                 placeholder="Enter title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <input
-                type="textarea"
                 className="input-name"
-                placeholder="Enter description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
               />
-            </div>
-            <div>
-              <Select
-                placeholder="Assigned to"
-                options={memberList}
-                onChange={(selectedOption) => {
-                  setMemberId(selectedOption.value);
-                }}
-                value={memberList.find((member) => member.value === memberId)}
+              <Field
+                name="description"
+                placeholder="Enter Description"
+                className="input-name"
               />
-            </div>
-          </div>
-          <button className="submit-button" type="submit">
-            {isEditMode ? "Update" : "Add"}
-          </button>
-        </form>
+              <Field as="select" name="memberId" className="input-name">
+                <option value="-1">Select a member</option>
+                {memberList.map((member) => (
+                  <option key={member.value} value={member.value}>
+                    {member.label}
+                  </option>
+                ))}
+              </Field>
+              <button
+                type="submit"
+                className="submit-button"
+                style={{ marginLeft: "10px" }}
+              >
+                Submit
+              </button>
+            </Form>
+          )}
+        </Formik>
       )}
     </div>
   );

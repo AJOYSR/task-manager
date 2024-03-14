@@ -1,42 +1,28 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import axios from "axios";
 import { UserContext } from "../context/userContext/LoginContext";
 import { useNavigate } from "react-router-dom";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
 const Login = () => {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-
-  const { isLoggedIn, handleLoginClick } = useContext(UserContext);
-
+  const { handleLoginClick } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const userExistorNot = async () => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     const backendEndpoint = "http://127.0.0.1:9001/public/login";
     try {
       const response = await axios.post(backendEndpoint, {
-        email: email,
-        password: password,
+        email: values.email,
+        password: values.password,
       });
       handleLoginClick(response.data);
       navigate("/home");
     } catch (error) {
-      navigate("/register");
+      // navigate("/register");
       console.error("Error:", error);
-    }
-  };
-
-  const handleSubmit = (e: any) => {
-    e.preventDefault();
-    if (localStorage.getItem("token")) {
-      userExistorNot();
-    } else {
-      try {
-        userExistorNot();
-      } catch (error) {
-        navigate("/register");
-        console.error("Error:", error);
-      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -44,31 +30,53 @@ const Login = () => {
     <div>
       <h1>Login to TMS</h1>
       <div className="input-form">
-        <form onSubmit={handleSubmit}>
-          <div>
-            <input
-              type="email"
-              placeholder="Enter Email"
-              className="input-name"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Enter password"
-              className="input-name"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div>
-            <button type="submit" className="submit-button">
-              Login
-            </button>
-          </div>
-        </form>
+        <Formik
+          initialValues={{
+            email: "",
+            password: "",
+          }}
+          validationSchema={Yup.object().shape({
+            email: Yup.string().email("Invalid email").required("Required"),
+            password: Yup.string().required("Required"),
+          })}
+          onSubmit={handleSubmit}
+        >
+          {({ isSubmitting }) => (
+            <Form>
+              <div>
+                <Field
+                  type="email"
+                  name="email"
+                  placeholder="Enter Email"
+                  className="input-name"
+                />
+                <ErrorMessage name="email" component="div" className="error" />
+              </div>
+              <div>
+                <Field
+                  type="password"
+                  name="password"
+                  placeholder="Enter Password"
+                  className="input-name"
+                />
+                <ErrorMessage
+                  name="password"
+                  component="div"
+                  className="error"
+                />
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  className="submit-button"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Logging in..." : "Login"}
+                </button>
+              </div>
+            </Form>
+          )}
+        </Formik>
       </div>
     </div>
   );
