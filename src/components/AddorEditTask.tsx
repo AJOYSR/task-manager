@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Select from "react-select";
+import { Spinner } from "./Spinner";
 
 const AddorEditTask = () => {
   const [title, setTitle] = useState("");
@@ -9,7 +10,8 @@ const AddorEditTask = () => {
   const [memberList, setMemberList] = useState([]);
   const [memberId, setMemberId] = useState(-1);
   const [isEditMode, setIsEditMode] = useState(false);
-  const navigte = useNavigate();
+  const [isLoading, setIsLoading] = useState(false); // New state for loading spinner
+  const navigate = useNavigate();
   const { id } = useParams();
   const taskUrl = `http://127.0.0.1:9001/private/tasks/${id}`;
   const membersUrl = "http://127.0.0.1:9001/private/members/";
@@ -20,6 +22,7 @@ const AddorEditTask = () => {
       Authorization: `Bearer ${authToken}`,
     };
 
+    setIsLoading(true); // Start loading
     axios
       .get(membersUrl, { headers })
       .then((response) => {
@@ -33,10 +36,15 @@ const AddorEditTask = () => {
       })
       .catch((error) => {
         console.error("Error fetching members:", error);
+      })
+      .finally(() => {
+        setIsLoading(false); // Stop loading
       });
+
     if (id) {
       setIsEditMode(true);
 
+      setIsLoading(true); // Start loading
       axios
         .get(taskUrl, { headers })
         .then((response) => {
@@ -47,17 +55,21 @@ const AddorEditTask = () => {
         })
         .catch((error) => {
           console.error("Error fetching task details:", error);
+        })
+        .finally(() => {
+          setIsLoading(false); // Stop loading
         });
     }
   }, [id]);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const authToken = localStorage.getItem("token");
     const headers = {
       Authorization: `Bearer ${authToken}`,
     };
 
+    setIsLoading(true); // Start loading
     try {
       if (isEditMode) {
         await axios.patch(
@@ -81,52 +93,58 @@ const AddorEditTask = () => {
           { headers }
         );
       }
-      navigte("/tasks");
+      navigate("/tasks");
       console.log("Task submitted successfully!");
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
   return (
     <div>
       <br />
-      <form onSubmit={handleSubmit}>
-        <div>
+      {isLoading ? ( 
+        <Spinner message={"Loading edit/add page"}/>
+      ) : (
+        <form onSubmit={handleSubmit}>
           <div>
-            <input
-              type="text"
-              className="input-name"
-              placeholder="Enter title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+            <div>
+              <input
+                type="text"
+                className="input-name"
+                placeholder="Enter title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
 
-          <div>
-            <input
-              type="textarea"
-              className="input-name"
-              placeholder="Enter description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <div>
+              <input
+                type="textarea"
+                className="input-name"
+                placeholder="Enter description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            <div>
+              <Select
+                placeholder="Assigned to"
+                options={memberList}
+                onChange={(selectedOption) => {
+                  setMemberId(selectedOption.value);
+                }}
+                value={memberList.find((member) => member.value === memberId)}
+              />
+            </div>
           </div>
-          <div>
-            <Select
-              placeholder="Assigned to"
-              options={memberList}
-              onChange={(selectedOption) => {
-                setMemberId(selectedOption.value);
-              }}
-              value={memberList.find((member) => member.value === memberId)}
-            />
-          </div>
-        </div>
-        <button className="submit-button" type="submit">
-          {isEditMode ? "Update" : "Add"}
-        </button>
-      </form>
+          <button className="submit-button" type="submit">
+            {isEditMode ? "Update" : "Add"}
+          </button>
+        </form>
+      )}
     </div>
   );
 };

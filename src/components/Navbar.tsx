@@ -7,7 +7,7 @@ const Navbar = () => {
   const { isLoggedIn, userName, handleLogoutClick } = useContext(UserContext);
 
   return (
-    <div className="navbar">
+    <div className={isLoggedIn ? "navbar" : "navbar-hidden"}>
       <div className="title-logo">
         <Link to="/">
           <img src={productImages.phoenix} alt="logo" />
@@ -18,12 +18,19 @@ const Navbar = () => {
         <div>
           {isLoggedIn ? (
             <p>
-              Mr. {userName} <button className="logout-button" onClick={
-                () => handleLogoutClick( {
-                    token : localStorage.getItem('token'),
-                    userName : localStorage.getItem('userName')
-                })
-              }> Logout</button>
+              Mr. {userName}{" "}
+              <button
+                className="logout-button"
+                onClick={() =>
+                  handleLogoutClick({
+                    token: localStorage.getItem("token"),
+                    userName: localStorage.getItem("userName"),
+                  })
+                }
+              >
+                {" "}
+                Logout
+              </button>
             </p>
           ) : null}
         </div>

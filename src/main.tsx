@@ -9,13 +9,12 @@ import { LoginContextProvider } from "./context/userContext/LoginContext.tsx";
 import HomePage from "./components/HomePage.tsx";
 import Navbar from "./components/Navbar.tsx";
 import Members from "./components/Members.tsx";
-import Tasks from './components/Tasks';
+import Tasks from "./components/Tasks";
 import TaskDetails from "./components/TaskDetails.tsx";
 import MemberDetails from "./components/MemberDetails.tsx";
 import AddorEditTask from "./components/AddorEditTask.tsx";
 import AddOrEditMember from "./components/AddOrEditMember.tsx";
-
-
+import { FormikExample } from "./components/FormikExample.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -35,6 +34,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/add-or-edit/:id" element={<AddorEditTask />} />
           <Route path="/add-or-edit-member" element={<AddOrEditMember />} />
           <Route path="/add-or-edit-member/:id" element={<AddOrEditMember />} />
+          <Route path="/formik" element={<FormikExample />} />
         </Routes>
       </LoginContextProvider>
     </BrowserRouter>
