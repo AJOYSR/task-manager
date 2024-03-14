@@ -5,9 +5,6 @@ import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [username, setUsername] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
 
   const navigate = useNavigate()
 
