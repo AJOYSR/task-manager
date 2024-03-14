@@ -1,7 +1,6 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
+import axios from "axios";
 import { Spinner } from "./Spinner";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup"; // Import Yup for validation
@@ -113,7 +112,7 @@ const AddorEditTask = () => {
           initialValues={{
             title: title || "",
             description: description || "",
-            memberId: -1,
+            memberId: memberId,
           }}
           validationSchema={Yup.object().shape({
             title: Yup.string()
@@ -180,7 +179,11 @@ const AddorEditTask = () => {
               >
                 <option value="-1">Select a member</option>
                 {memberList.map((member) => (
-                  <option key={member.value} value={member.value}>
+                  <option
+                    key={member.value}
+                    value={member.value}
+                    selected={member.value == memberId ? true : false} // Set selected attribute conditionally
+                  >
                     {member.label}
                   </option>
                 ))}

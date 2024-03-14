@@ -2,20 +2,26 @@ import { useContext, useEffect } from "react";
 import { productImages } from "../utils/image";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext/LoginContext";
-const LadingPage = () => {
+import '../../src/landingPage.css'
+
+
+
+const LandingPage = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useContext(UserContext);
+
   useEffect(() => {
     if (isLoggedIn) navigate("/home");
   }, [isLoggedIn]);
+
   return (
-    <div>
+    <div className="landing-page-container">
       <div className="image-tile">
         <img src={productImages.phoenix} alt="logo" className="logo" />
         <h1>Task Management</h1>
       </div>
 
-      <div className="login-register">
+      <div className="button-container">
         <Link to={"/login"}>
           <button className="submit-button">Login</button>
         </Link>
@@ -27,4 +33,4 @@ const LadingPage = () => {
   );
 };
 
-export default LadingPage;
+export default LandingPage;
