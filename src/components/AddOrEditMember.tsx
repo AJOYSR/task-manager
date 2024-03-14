@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Spinner } from "./Spinner";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
 const AddOrEditMember = () => {
   const { id } = useParams();
@@ -58,6 +59,8 @@ const AddOrEditMember = () => {
     }
   };
 
+
+  
   return (
     <div style={{ marginTop: "20px" }}>
       {isLoading ? (
@@ -67,17 +70,24 @@ const AddOrEditMember = () => {
           initialValues={{
             name: name || "",
           }}
+          validationSchema={Yup.object().shape({
+            name: Yup.string()
+              .required("Name is required")
+              .min(2, "Name must be at least 2 characters")
+              .max(50, "Name must be at most 50 characters"),
+          })}
           onSubmit={(values) => {
             handleSubmit(values);
           }}
         >
-          {() => (
+          {({ touched, errors }) => (
             <Form>
               <Field
                 name="name"
                 placeholder="Enter Name of Member"
-                className="input-name"
+                className={`input-name ${touched.name && errors.name ? "error" : ""}`}
               />
+              {touched.name && errors.name && <div className="error">{errors.name}</div>}
               <button
                 type="submit"
                 className="submit-button"

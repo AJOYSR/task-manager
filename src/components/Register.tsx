@@ -5,8 +5,7 @@ import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (values, { setSubmitting }) => {
     const backendEndpoint = "http://127.0.0.1:9001/public/register";
@@ -23,7 +22,7 @@ const Register = () => {
       console.error("Error:", error);
     } finally {
       setSubmitting(false);
-      navigate("/home")
+      navigate("/home");
     }
   };
 
@@ -38,9 +37,16 @@ const Register = () => {
             password: "",
           }}
           validationSchema={Yup.object().shape({
-            username: Yup.string().required("Required"),
-            email: Yup.string().email("Invalid email").required("Required"),
-            password: Yup.string().required("Required"),
+            username: Yup.string()
+              .min(3, "Username must be at least 3 characters")
+              .required("Username is required"),
+            email: Yup.string()
+              .email("Invalid email")
+              .required("Email is required"),
+            password: Yup.string()
+              .min(4, "Password must be at least 4characters")
+              .max(20, "Password must be at most 20 characters")
+              .required("Password is required"),
           })}
           onSubmit={handleSubmit}
         >

@@ -8,7 +8,8 @@ import * as Yup from "yup";
 const Login = () => {
   const { handleLoginClick } = useContext(UserContext);
   const navigate = useNavigate();
-
+  
+  console.log("🚀 ~ ErrorMessage:", ErrorMessage)
   const handleSubmit = async (values, { setSubmitting }) => {
     const backendEndpoint = "http://127.0.0.1:9001/public/login";
     try {
@@ -25,7 +26,7 @@ const Login = () => {
       setSubmitting(false);
     }
   };
-
+  
   return (
     <div>
       <h1>Login to TMS</h1>
@@ -40,7 +41,8 @@ const Login = () => {
             password: Yup.string().required("Required"),
           })}
           onSubmit={handleSubmit}
-        >
+          
+          >
           {({ isSubmitting }) => (
             <Form>
               <div>

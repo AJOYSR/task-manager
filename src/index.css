@@ -229,3 +229,7 @@
   background: #c2acac;
   color: black;
 }
+
+.error {
+  color: #ff0015;
+}
