@@ -12,7 +12,7 @@ const MemberDetails = () => {
   const [userTasks, setUserTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
-  const {updateMembers} = useContext(UserContext);
+  const { handleDeleteMember } = useContext(UserContext);
 
   const apiUrl = `http://127.0.0.1:9001/private/members/${id}`;
   const url = "http://127.0.0.1:9001/private/tasks/";
@@ -71,21 +71,9 @@ const MemberDetails = () => {
   };
 
   const confirmDelete = async () => {
-    const url = "http://127.0.0.1:9001/private/members/";
-    try {
-      const authToken = localStorage.getItem("token");
-
-      await axios.delete(url + `${id}`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
-      setShowModal(false);
-      // updateMembers(member)
-      navigate("/members");
-    } catch (error) {
-      console.error("Error deleting task:", error);
-    }
+    await handleDeleteMember(id);
+    setShowModal(false);
+    navigate("/members");
   };
 
   const closeModal = () => {

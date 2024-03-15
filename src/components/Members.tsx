@@ -1,81 +1,39 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Spinner } from "./Spinner";
+import { UserContext } from "../context/userContext/LoginContext";
 
 const Members = () => {
-  const [members, setMembers] = useState([]);
+  const { fetchTasksCount, members } = useContext(UserContext);
   const [tasksCount, setTasksCount] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const url = "http://127.0.0.1:9001/private/members/";
-
   useEffect(() => {
     setIsLoading(true);
 
-    const authToken = localStorage.getItem("token");
-    const headers = {
-      Authorization: `Bearer ${authToken}`,
-    };
-
-    axios
-      .get(url, { headers })
-      .then((response) => {
-        setMembers(response.data.members);
-
-        // Fetch tasks count for each member
-        const tasksCountPromises = response.data.members.map((member) =>
+    const fetchTasksCounts = async () => {
+      try {
+        const tasksCountMap = {};
+        const tasksCountPromises = members.map((member) =>
           fetchTasksCount(member.id)
         );
 
-        // Wait for all promises to resolve and update tasks count state
-        Promise.all(tasksCountPromises)
-          .then((counts) => {
-            const tasksCountMap = {};
-            response.data.members.forEach((member, index) => {
-              tasksCountMap[member.id] = counts[index];
-            });
-            setTasksCount(tasksCountMap);
-          })
-          .catch((error) => {
-            setError("Error fetching tasks count. Please try again later.");
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-      })
-      .catch((error) => {
-        console.error("Error fetching members:", error);
-        setError("Error fetching members. Please try again later.");
+        const counts = await Promise.all(tasksCountPromises);
+        members.forEach((member, index) => {
+          tasksCountMap[member.id] = counts[index];
+        });
+
+        setTasksCount(tasksCountMap);
+      } catch (error) {
+        setError("Error fetching tasks count. Please try again later.");
+      } finally {
         setIsLoading(false);
-      });
-  }, []);
+      }
+    };
 
-  const fetchTasksCount = async (currentId) => {
-    try {
-      const authToken = localStorage.getItem("token");
-      const headers = {
-        Authorization: `Bearer ${authToken}`,
-      };
-
-      // Fetch all tasks from the server
-      const response = await axios.get("http://127.0.0.1:9001/private/tasks/", {
-        headers,
-      });
-
-      // Filter tasks based on the memberId
-      const memberTasks = response.data.tasks.filter(
-        (task) => task.memberId === currentId
-      );
-
-      // Return the count of tasks for the member
-      return memberTasks.length;
-    } catch (error) {
-      console.error("Error fetching tasks count:", error);
-      return 0;
-    }
-  };
+    fetchTasksCounts();
+  }, [members, fetchTasksCount]);
 
   if (isLoading) {
     return <Spinner message={"Loading ......."} />;

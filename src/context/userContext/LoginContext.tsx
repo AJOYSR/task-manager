@@ -11,6 +11,11 @@ export const UserContext = createContext({
   updateTasks: (_: any) => null,
   handleEditTasks: (_: any) => null,
   handleDeleteTask: (_: any) => null,
+  members: [],
+  fetchMembers: () => null,
+  fetchTaskCount: () => null,
+  handleEditMember: () => null,
+  handleDeleteMember: (_: any) => null,
 });
 
 export const LoginContextProvider = (props: any) => {
@@ -20,6 +25,7 @@ export const LoginContextProvider = (props: any) => {
     return storedUserName !== null ? storedUserName : "";
   });
   const [tasks, setTasks] = useState([]);
+  const [members, setMembers] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,8 +33,93 @@ export const LoginContextProvider = (props: any) => {
       setIsLoggedIn(true);
       setUserName(localStorage.getItem("userName"));
       fetchTasks();
+      fetchMembers();
     }
   }, []);
+
+  const fetchMembers = async () => {
+    const authToken = localStorage.getItem("token");
+    const headers = {
+      Authorization: `Bearer ${authToken}`,
+    };
+
+    try {
+      const response = await axios.get(
+        "http://127.0.0.1:9001/private/members/",
+        {
+          headers,
+        }
+      );
+      setMembers(response.data.members);
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    }
+  };
+
+
+  const handleEditMember = async (id, name) => {
+    const authToken = localStorage.getItem("token");
+    const headers = {
+      Authorization: `Bearer ${authToken}`,
+    };
+
+    try {
+      const endpoint = id ? `http://127.0.0.1:9001/private/members/${id}` : "http://127.0.0.1:9001/private/members";
+      const method = id ? axios.patch : axios.post;
+
+      const response = await method(endpoint, { name }, { headers });
+
+      console.log("Response from server:", response.data);
+
+      fetchMembers();
+
+      navigate("/members");
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  
+  const handleDeleteMember = async (memberId) => {
+    const url = `http://127.0.0.1:9001/private/members/${memberId}`;
+    try {
+      const authToken = localStorage.getItem("token");
+
+      await axios.delete(url, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      // Filter out the deleted member from members array
+      fetchMembers();
+    } catch (error) {
+      console.error("Error deleting member:", error);
+    }
+  };
+
+
+  const fetchTasksCount = async (currentId) => {
+    try {
+      const authToken = localStorage.getItem("token");
+      const headers = {
+        Authorization: `Bearer ${authToken}`,
+      };
+
+      const response = await axios.get("http://127.0.0.1:9001/private/tasks/", {
+        headers,
+      });
+
+      const memberTasks = response.data.tasks.filter(
+        (task) => task.memberId === currentId
+      );
+
+      return memberTasks.length;
+    } catch (error) {
+      console.error("Error fetching tasks count:", error);
+      return 0;
+    }
+  };
 
   const fetchTasks = async () => {
     const authToken = localStorage.getItem("token");
@@ -53,6 +144,7 @@ export const LoginContextProvider = (props: any) => {
       setIsLoggedIn(true);
       setUserName(data.user.name);
       fetchTasks();
+      fetchMembers();
     }
     return null;
   };
@@ -142,6 +234,11 @@ export const LoginContextProvider = (props: any) => {
         updateTasks,
         handleEditTasks,
         handleDeleteTask,
+        members,
+        fetchMembers,
+        fetchTasksCount,
+        handleEditMember,
+        handleDeleteMember,
       }}
     >
       {props.children}
