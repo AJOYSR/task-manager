@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Modal from "./Modal";
 import { Spinner } from "./Spinner";
+import { UserContext } from "../context/userContext/LoginContext";
 
 const MemberDetails = () => {
   const { id } = useParams();
@@ -11,6 +12,8 @@ const MemberDetails = () => {
   const [userTasks, setUserTasks] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const {updateMembers} = useContext(UserContext);
+
   const apiUrl = `http://127.0.0.1:9001/private/members/${id}`;
   const url = "http://127.0.0.1:9001/private/tasks/";
 
@@ -23,22 +26,23 @@ const MemberDetails = () => {
             Authorization: `Bearer ${authToken}`,
           },
         });
-  
+
         console.log(response.data.tasks);
         setTasks(response.data.tasks);
-  
+
         // Filter tasks based on the memberId
-        const memberTasks = response.data.tasks.filter((task) => task.Member?.id === parseInt(id));
+        const memberTasks = response.data.tasks.filter(
+          (task) => task.Member?.id === parseInt(id)
+        );
         console.log(memberTasks);
         setUserTasks(memberTasks);
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
     };
-  
+
     fetchTasks();
   }, [url, id]);
-  
 
   useEffect(() => {
     const fetchMember = async () => {
@@ -54,7 +58,6 @@ const MemberDetails = () => {
 
         console.log(response.data.member);
         setMember(response.data.member);
-
       } catch (error) {
         console.error("Error fetching user details:", error);
       }
@@ -78,6 +81,7 @@ const MemberDetails = () => {
         },
       });
       setShowModal(false);
+      // updateMembers(member)
       navigate("/members");
     } catch (error) {
       console.error("Error deleting task:", error);

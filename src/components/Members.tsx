@@ -78,7 +78,7 @@ const Members = () => {
   };
 
   if (isLoading) {
-    return (<Spinner message={"Loading ......."}/>);
+    return <Spinner message={"Loading ......."} />;
   }
 
   if (error) {

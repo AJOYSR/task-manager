@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Spinner } from "./Spinner";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { UserContext } from "../context/userContext/LoginContext";
 
 const AddOrEditMember = () => {
   const { id } = useParams();
+  const { isLoggedIn } = useContext(UserContext);
   const [name, setName] = useState("");
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -14,14 +16,13 @@ const AddOrEditMember = () => {
   useEffect(() => {
     if (id) {
       // Fetch existing member details if in edit mode
-      const authToken = localStorage.getItem("token");
-      const backendEndpoint = `http://127.0.0.1:9001/private/members/${id}`;
-      const headers = {
-        Authorization: `Bearer ${authToken}`,
-      };
       setIsLoading(true);
       axios
-        .get(backendEndpoint, { headers })
+        .get(`http://127.0.0.1:9001/private/members/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
         .then((response) => {
           setName(response.data.member.name);
         })
@@ -59,8 +60,6 @@ const AddOrEditMember = () => {
     }
   };
 
-
-  
   return (
     <div style={{ marginTop: "20px" }}>
       {isLoading ? (
