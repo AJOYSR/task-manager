@@ -9,6 +9,8 @@ export const UserContext = createContext({
   handleLogoutClick: (_: any) => null,
   tasks: [],
   updateTasks: (_: any) => null,
+  handleEditTasks: (_: any) => null,
+  handleDeleteTask: (_: any) => null,
 });
 
 export const LoginContextProvider = (props: any) => {
@@ -66,6 +68,67 @@ export const LoginContextProvider = (props: any) => {
 
   const updateTasks = (newTasks: any) => {
     setTasks(newTasks);
+    fetchTasks();
+  };
+
+  const handleEditTasks = async (data) => {
+    const authToken = localStorage.getItem("token");
+    const headers = {
+      Authorization: `Bearer ${authToken}`,
+    };
+
+    try {
+      if (data.id) {
+        // Edit mode
+        const taskUrl = `http://127.0.0.1:9001/private/tasks/${data.id}`;
+        await axios.patch(
+          taskUrl,
+          {
+            title: data.title,
+            description: data.description,
+            memberId: data.memberId,
+          },
+          { headers }
+        );
+
+        // for updating tasks
+        fetchTasks();
+      } else {
+        // Add mode
+        await axios.post(
+          "http://127.0.0.1:9001/private/tasks",
+          {
+            title: data.title,
+            description: data.description,
+            memberId: data.memberId,
+          },
+          { headers }
+        );
+
+        // Fetch updated tasks and update tasks array
+        fetchTasks();
+      }
+    } catch (error) {
+      console.error("Error editing/adding task:", error);
+    }
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    const authToken = localStorage.getItem("token");
+    const headers = {
+      Authorization: `Bearer ${authToken}`,
+    };
+
+    try {
+      await axios.delete(`http://127.0.0.1:9001/private/tasks/${taskId}`, {
+        headers,
+      });
+
+      // Filter out the deleted task from tasks array
+      fetchTasks();
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
   };
 
   return (
@@ -77,6 +140,8 @@ export const LoginContextProvider = (props: any) => {
         handleLogoutClick,
         tasks,
         updateTasks,
+        handleEditTasks,
+        handleDeleteTask,
       }}
     >
       {props.children}

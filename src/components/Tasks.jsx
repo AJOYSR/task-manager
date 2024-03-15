@@ -1,37 +1,15 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Spinner } from "./Spinner";
+import { UserContext } from "../context/userContext/LoginContext";
 
 const Tasks = () => {
-  const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { tasks, updateTasks } = useContext(UserContext);
   const [error, setError] = useState(null);
-  const url = "http://127.0.0.1:9001/private/tasks/";
-
-  useEffect(() => {
-    setIsLoading(true);
-
-    const authToken = localStorage.getItem("token");
-    const headers = {
-      Authorization: `Bearer ${authToken}`,
-    };
-
-    axios
-      .get(url, { headers })
-      .then((response) => {
-        setTasks(response.data.tasks);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching tasks:", error);
-        setError("Error fetching tasks. Please try again later.");
-        setIsLoading(false);
-      });
-  }, []);
 
   if (isLoading) {
-    return (<Spinner message={"Loading ......."}/>);
+    return <Spinner message={"Loading ......."} />;
   }
 
   if (error) {

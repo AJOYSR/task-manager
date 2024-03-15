@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { Spinner } from "./Spinner";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup"; // Import Yup for validation
+import * as Yup from "yup"; 
+import { UserContext } from "../context/userContext/LoginContext";
 
 const AddorEditTask = () => {
   const [title, setTitle] = useState("");
@@ -11,94 +12,64 @@ const AddorEditTask = () => {
   const [memberList, setMemberList] = useState([]);
   const [memberId, setMemberId] = useState(-1);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // New state for loading spinner
+  const [isLoading, setIsLoading] = useState(false); 
   const navigate = useNavigate();
   const { id } = useParams();
-  const taskUrl = `http://127.0.0.1:9001/private/tasks/${id}`;
+  
+  const { handleEditTasks } = useContext(UserContext);
+
+  const taskUrl = `http://127.0.0.1:9001/private/tasks/${id || ""}`;
   const membersUrl = "http://127.0.0.1:9001/private/members/";
 
   useEffect(() => {
-    const authToken = localStorage.getItem("token");
-    const headers = {
-      Authorization: `Bearer ${authToken}`,
-    };
+    const fetchTaskDetails = async () => {
+      const authToken = localStorage.getItem("token");
+      const headers = { Authorization: `Bearer ${authToken}` };
+      setIsLoading(true);
 
-    setIsLoading(true); // Start loading
-    axios
-      .get(membersUrl, { headers })
-      .then((response) => {
-        const newMemList = response.data.members.map((indMember) => {
-          return {
-            value: indMember.id,
-            label: indMember.name,
-          };
-        });
+      try {
+        const [membersResponse, taskResponse] = await Promise.all([
+          axios.get(membersUrl, { headers }),
+          id ? axios.get(taskUrl, { headers }) : null,
+        ]);
+        const newMemList = membersResponse.data.members.map((indMember) => ({
+          value: indMember.id,
+          label: indMember.name,
+        }));
         setMemberList(newMemList);
-      })
-      .catch((error) => {
-        console.error("Error fetching members:", error);
-      })
-      .finally(() => {
-        setIsLoading(false); // Stop loading
-      });
 
-    if (id) {
-      setIsEditMode(true);
-
-      setIsLoading(true); // Start loading
-      axios
-        .get(taskUrl, { headers })
-        .then((response) => {
-          const taskDetails = response.data.task;
+        if (id && taskResponse) {
+          const taskDetails = taskResponse.data.task;
           setTitle(taskDetails.title);
           setDescription(taskDetails.description);
           setMemberId(taskDetails.memberId);
-        })
-        .catch((error) => {
-          console.error("Error fetching task details:", error);
-        })
-        .finally(() => {
-          setIsLoading(false); // Stop loading
-        });
-    }
+          setIsEditMode(true);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTaskDetails();
   }, [id]);
 
   const handleSubmit = async (values) => {
-    const authToken = localStorage.getItem("token");
-    const headers = {
-      Authorization: `Bearer ${authToken}`,
-    };
-
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
     try {
-      if (isEditMode) {
-        await axios.patch(
-          taskUrl,
-          {
-            title: values.title,
-            description: values.description,
-            memberId: values.memberId,
-          },
-          { headers }
-        );
-      } else {
-        // Add mode: Create new task
-        await axios.post(
-          "http://127.0.0.1:9001/private/tasks",
-          {
-            title: values.title,
-            description: values.description,
-            memberId: values.memberId,
-          },
-          { headers }
-        );
-      }
+      await handleEditTasks({
+        id: isEditMode ? id : null,
+        title: values.title,
+        description: values.description,
+        memberId: values.memberId,
+      });
       navigate("/tasks");
       console.log("Task submitted successfully!");
     } catch (error) {
       console.error("Error:", error);
     } finally {
-      setIsLoading(false); // Stop loading
+      setIsLoading(false);
     }
   };
 
@@ -109,11 +80,7 @@ const AddorEditTask = () => {
         <Spinner message={"Loading edit/add page"} />
       ) : (
         <Formik
-          initialValues={{
-            title: title || "",
-            description: description || "",
-            memberId: memberId,
-          }}
+          initialValues={{ title, description, memberId }}
           validationSchema={Yup.object().shape({
             title: Yup.string()
               .required("Title is required")
@@ -182,7 +149,7 @@ const AddorEditTask = () => {
                   <option
                     key={member.value}
                     value={member.value}
-                    selected={member.value == memberId ? true : false} // Set selected attribute conditionally
+                    selected={member.value === memberId} 
                   >
                     {member.label}
                   </option>
