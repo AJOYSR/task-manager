@@ -1,21 +1,41 @@
 import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMembersAsync, fetchTasksAsync } from "../../slices/mainSlice";
+import { IStoreState } from "../../types/store";
+import store from "./../../store/store";
 
-export const UserContext = createContext({
+interface IUserContext {
+  isLoggedIn: boolean;
+  handleLoginClick: (data: any) => void;
+  userName: string | null;
+  handleLogoutClick: () => void;
+  tasks: any[]; // Define appropriate type for tasks
+  updateTasks: () => void;
+  handleEditTasks: (data: any) => void;
+  handleDeleteTask: (taskId: any) => void;
+  members: any[]; // Define appropriate type for members
+  fetchMembers: () => void;
+  fetchTasksCount: (currentId: any) => Promise<number>;
+  handleEditMember: (id: any, name: string) => void;
+  handleDeleteMember: (memberId: any) => void;
+}
+
+export const UserContext = createContext<IUserContext>({
   isLoggedIn: false,
-  handleLoginClick: (_: any) => null,
+  handleLoginClick: (_: any) => {},
   userName: "",
-  handleLogoutClick: (_: any) => null,
+  handleLogoutClick: () => {},
   tasks: [],
-  updateTasks: (_: any) => null,
-  handleEditTasks: (_: any) => null,
-  handleDeleteTask: (_: any) => null,
+  updateTasks: () => {},
+  handleEditTasks: (_: any) => {},
+  handleDeleteTask: (_: any) => {},
   members: [],
-  fetchMembers: () => null,
-  fetchTaskCount: () => null,
-  handleEditMember: () => null,
-  handleDeleteMember: (_: any) => null,
+  fetchMembers: () => {},
+  fetchTasksCount: async () => 0,
+  handleEditMember: (_: any, __: string) => {},
+  handleDeleteMember: (_: any) => {},
 });
 
 export const LoginContextProvider = (props: any) => {
@@ -24,9 +44,11 @@ export const LoginContextProvider = (props: any) => {
     const storedUserName = localStorage.getItem("userName");
     return storedUserName !== null ? storedUserName : "";
   });
-  const [tasks, setTasks] = useState([]);
-  const [members, setMembers] = useState([]);
+  const tasks = useSelector((state: IStoreState) => state.app.tasks);
+  const members = useSelector((state: IStoreState) => state.app.members);
   const navigate = useNavigate();
+
+  const dispatch: typeof store.dispatch = useDispatch();
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -37,34 +59,24 @@ export const LoginContextProvider = (props: any) => {
     }
   }, []);
 
-  const fetchMembers = async () => {
-    const authToken = localStorage.getItem("token");
-    const headers = {
-      Authorization: `Bearer ${authToken}`,
-    };
-
-    try {
-      const response = await axios.get(
-        "http://127.0.0.1:9001/private/members/",
-        {
-          headers,
-        }
-      );
-      setMembers(response.data.members);
-    } catch (error) {
-      console.error("Error fetching members:", error);
-    }
+  const fetchTasks = async () => {
+    dispatch(fetchTasksAsync());
   };
 
+  const fetchMembers = async () => {
+    dispatch(fetchMembersAsync());
+  };
 
-  const handleEditMember = async (id, name) => {
+  const handleEditMember = async (id: any, name: string) => {
     const authToken = localStorage.getItem("token");
     const headers = {
       Authorization: `Bearer ${authToken}`,
     };
 
     try {
-      const endpoint = id ? `http://127.0.0.1:9001/private/members/${id}` : "http://127.0.0.1:9001/private/members";
+      const endpoint = id
+        ? `http://127.0.0.1:9001/private/members/${id}`
+        : "http://127.0.0.1:9001/private/members";
       const method = id ? axios.patch : axios.post;
 
       const response = await method(endpoint, { name }, { headers });
@@ -79,8 +91,7 @@ export const LoginContextProvider = (props: any) => {
     }
   };
 
-  
-  const handleDeleteMember = async (memberId) => {
+  const handleDeleteMember = async (memberId: any) => {
     const url = `http://127.0.0.1:9001/private/members/${memberId}`;
     try {
       const authToken = localStorage.getItem("token");
@@ -98,8 +109,7 @@ export const LoginContextProvider = (props: any) => {
     }
   };
 
-
-  const fetchTasksCount = async (currentId) => {
+  const fetchTasksCount = async (currentId: any) => {
     try {
       const authToken = localStorage.getItem("token");
       const headers = {
@@ -111,29 +121,13 @@ export const LoginContextProvider = (props: any) => {
       });
 
       const memberTasks = response.data.tasks.filter(
-        (task) => task.memberId === currentId
+        (task: any) => task.memberId === currentId
       );
 
       return memberTasks.length;
     } catch (error) {
       console.error("Error fetching tasks count:", error);
       return 0;
-    }
-  };
-
-  const fetchTasks = async () => {
-    const authToken = localStorage.getItem("token");
-    const headers = {
-      Authorization: `Bearer ${authToken}`,
-    };
-
-    try {
-      const response = await axios.get("http://127.0.0.1:9001/private/tasks/", {
-        headers,
-      });
-      setTasks(response.data.tasks);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
     }
   };
 
@@ -149,7 +143,7 @@ export const LoginContextProvider = (props: any) => {
     return null;
   };
 
-  const handleLogoutClick = (data: any) => {
+  const handleLogoutClick = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userName");
     setIsLoggedIn(false);
@@ -158,12 +152,11 @@ export const LoginContextProvider = (props: any) => {
     return null;
   };
 
-  const updateTasks = (newTasks: any) => {
-    setTasks(newTasks);
+  const updateTasks = () => {
     fetchTasks();
   };
 
-  const handleEditTasks = async (data) => {
+  const handleEditTasks = async (data: any) => {
     const authToken = localStorage.getItem("token");
     const headers = {
       Authorization: `Bearer ${authToken}`,
@@ -205,7 +198,7 @@ export const LoginContextProvider = (props: any) => {
     }
   };
 
-  const handleDeleteTask = async (taskId) => {
+  const handleDeleteTask = async (taskId: any) => {
     const authToken = localStorage.getItem("token");
     const headers = {
       Authorization: `Bearer ${authToken}`,

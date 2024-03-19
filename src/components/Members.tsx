@@ -3,19 +3,28 @@ import { Link } from "react-router-dom";
 import { Spinner } from "./Spinner";
 import { UserContext } from "../context/userContext/LoginContext";
 
+interface Member {
+  id: number;
+  name: string;
+}
+
+interface TasksCount {
+  [key: number]: number;
+}
+
 const Members = () => {
   const { fetchTasksCount, members } = useContext(UserContext);
-  const [tasksCount, setTasksCount] = useState({});
+  const [tasksCount, setTasksCount] = useState<TasksCount>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
 
     const fetchTasksCounts = async () => {
       try {
-        const tasksCountMap = {};
-        const tasksCountPromises = members.map((member) =>
+        const tasksCountMap: TasksCount = {};
+        const tasksCountPromises = members.map((member: Member) =>
           fetchTasksCount(member.id)
         );
 
@@ -55,7 +64,7 @@ const Members = () => {
         </button>
       </div>
       <ul>
-        {members.map((member) => (
+        {members.map((member: Member) => (
           <li className="task-list" key={member.id}>
             <p>
               <Link to={`/member-details/${member.id}`}>

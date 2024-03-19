@@ -69,9 +69,13 @@ const AddOrEditMember = () => {
               <Field
                 name="name"
                 placeholder="Enter Name of Member"
-                className={`input-name ${touched.name && errors.name ? "error" : ""}`}
+                className={`input-name ${
+                  touched.name && errors.name ? "error" : ""
+                }`}
               />
-              {touched.name && errors.name && <div className="error">{errors.name}</div>}
+              {touched.name && errors.name && (
+                <div className="error">{errors.name}</div>
+              )}
               <button
                 type="submit"
                 className="submit-button"
